@@ -1,8 +1,27 @@
-import { Button, Card, Form, Input } from "antd";
+import { Button, Card, Form, Input, message, notification } from "antd";
+import axios from "axios";
 import { Link } from "react-router-dom";
 
 function Login() {
     const [form] = Form.useForm()
+    const [api, contextHolder] = notification.useNotification()
+    const [messageApi, messageContextHolder] = message.useMessage()
+
+    const onLogin = (values) => {
+        axios.post("http://localhost:8080/login", values)
+            .then(() => {
+                messageApi.open({
+                    type: "success",
+                    content: "Logged in"
+                })
+            })
+            .catch((error) => {
+                api["error"]({
+                    message: "Login Failed",
+                    description: error.response.data,
+                })
+            })
+    }
 
     return (
         <div
@@ -13,6 +32,8 @@ function Login() {
                 alignItems: "center"
             }}
         >
+            {contextHolder}
+            {messageContextHolder}
             <Card
                 title={"Login"}
                 style={{

@@ -1,8 +1,31 @@
-import { Link } from "react-router-dom";
-import { Button, Card, DatePicker, Form, Input, Select } from "antd"
+import { Link, useNavigate } from "react-router-dom";
+import { Button, Card, DatePicker, Form, Input, message, notification, Select } from "antd"
+import axios from 'axios'
 
 function Register() {
     const [form] = Form.useForm()
+    const navigate = useNavigate()
+    const [api, contextHolder] = notification.useNotification()
+    const [messageApi, messageContextHolder] = message.useMessage()
+
+    const onRegister = (values) => {
+        axios.post("http://localhost:8080/register", values)
+            .then(() => {
+                messageApi.open({
+                    type: "success",
+                    content: "Registration Complete!"
+                })
+                setTimeout(() => {
+                    navigate("/")
+                }, 500);
+            })
+            .catch((error) => {
+                api["error"]({
+                    message: "Registration Failed",
+                    description: error.response.data
+                })
+            })
+    }
 
     return (
         <div
@@ -13,12 +36,15 @@ function Register() {
                 alignItems: "center",
             }}
         >
+            {contextHolder}
+            {messageContextHolder}
             <Card title="Register" style={{
                 width: "400px"
             }}>
                 <Form
                     form={form}
                     layout="vertical"
+                    onFinish={onRegister}
                 >
                     <Form.Item
                         name={"first_name"}
@@ -118,9 +144,9 @@ function Register() {
                     <Form.Item name={"confirm_password"}>
                         <Input placeholder="Confirm Password" type="password" />
                     </Form.Item>
+                    <Button type="primary" htmlType="submit">Register</Button>
+                    <Link to={"/"}>Login?</Link>
                 </Form>
-                <Button type="primary" htmlType="submit">Register</Button>
-                <Link to={"/"}>Login?</Link>
             </Card>
         </div>
     )
