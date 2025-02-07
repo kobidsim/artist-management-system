@@ -13,31 +13,37 @@ func main() {
 	defer db.Close()
 
 	schema := `
+		DROP TABLE IF EXISTS user;
+
+		DROP TABLE IF EXISTS artist;
+
+		DROP TABLE IF EXISTS music;
+
 		CREATE TABLE IF NOT EXISTS user (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			first_name VARCHAR(255),
 			last_name VARCHAR(255),
 			role TEXT CHECK( role IN ('super_admin', 'artist_manager', 'artist') ) NOT NULL,
-			email VARCHAR(255),
+			email VARCHAR(255) UNIQUE,
 			password VARCHAR(500),
 			phone VARCHAR(20),
-			dob DATETIME,
+			dob TEXT,
 			gender TEXT CHECK( gender IN ('m', 'f', 'o') ),
 			address VARCHAR(255),
-			created_at DATETIME,
-			updated_at DATETIME
+			created_at TEXT,
+			updated_at TEXT
 		);
 
 		CREATE TABLE IF NOT EXISTS artist (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			name VARCHAR(255),
-			dob DATETIME,
+			dob TEXT,
 			gender TEXT CHECK( gender IN ('m', 'f', 'o') ),
 			address VARCHAR(255),
 			first_release_year YEAR,
 			no_of_albums_released INTEGER,
-			created_at DATETIME,
-			updated_at DATETIME
+			created_at TEXT,
+			updated_at TEXT
 		);
 
 		CREATE TABLE IF NOT EXISTS music (
@@ -45,8 +51,8 @@ func main() {
 			artist_id INTEGER,
 			album_name VARCHAR(255),
 			genre TEXT CHECK( genre IN ('rnb', 'country', 'classic', 'rock', 'jazz') ),
-			created_at DATETIME,
-			updated_at DATETIME,
+			created_at TEXT,
+			updated_at TEXT,
 			FOREIGN KEY (artist_id) REFERENCES artist(id)
 		);
 	`

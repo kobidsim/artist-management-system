@@ -2,9 +2,11 @@ package main
 
 import (
 	"artist-management-system/database"
-	"net/http"
+	"artist-management-system/routes"
+	custom_validator "artist-management-system/validator"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
@@ -15,9 +17,10 @@ func main() {
 	}
 	defer db.Close()
 
-	app.GET("/", func(ctx echo.Context) error {
-		return ctx.String(http.StatusOK, "Hello World")
-	})
+	app.Use(middleware.CORS())
+	app.Validator = custom_validator.NewCustomValidator()
+
+	routes.SetupRoutes(app, db)
 
 	app.Logger.Fatal(app.Start(":8080"))
 }
