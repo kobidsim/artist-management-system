@@ -31,12 +31,13 @@ func (handler authenticationHandler) Login(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, "Bad Request")
 	}
 
-	token, err := handler.authenticationService.Login(params)
+	response, err := handler.authenticationService.Login(params)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, "Username or password incorrect")
 	}
-	return ctx.JSON(http.StatusOK, map[string]string{
-		"token": token,
+	return ctx.JSON(http.StatusOK, map[string]interface{}{
+		"data":  response,
+		"error": false,
 	})
 }
 

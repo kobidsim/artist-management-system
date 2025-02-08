@@ -1,19 +1,39 @@
 import { Button, Card, Form, Input, message, notification } from "antd";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 function Login() {
     const [form] = Form.useForm()
+    const navigate = useNavigate()
     const [api, contextHolder] = notification.useNotification()
     const [messageApi, messageContextHolder] = message.useMessage()
 
     const onLogin = (values) => {
         axios.post("http://localhost:8080/login", values)
-            .then(() => {
+            .then((res) => {
                 messageApi.open({
                     type: "success",
                     content: "Logged in"
                 })
+                localStorage.setItem("role", res.data.data["role"])
+                localStorage.setItem("jwt", res.data.data["token"])
+                let navigateToRoute = ""
+                switch (res.data.data["role"]) {
+                    case "super_admin":
+                        navigateToRoute = "/dashboard/users"
+                        break;
+                    
+                    case "artist_manager":
+                    case "artist":
+                        navigateToRoute = "/dashboard/artists"
+                        break;
+
+                    default:
+                        break;
+                }
+
+                setTimeout(() => navigate(navigateToRoute), 500)
             })
             .catch((error) => {
                 api["error"]({
