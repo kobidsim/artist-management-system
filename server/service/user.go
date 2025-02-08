@@ -2,8 +2,11 @@ package service
 
 import (
 	"artist-management-system/domain"
+	"artist-management-system/view"
 	"database/sql"
 	"fmt"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type userService struct {
@@ -12,6 +15,7 @@ type userService struct {
 
 type UserService interface {
 	All() ([]domain.User, error)
+	Create(params view.CreateUserView) error
 }
 
 func NewUserService(db *sql.DB) UserService {
@@ -48,4 +52,24 @@ func (service userService) All() ([]domain.User, error) {
 	}
 
 	return users, nil
+}
+
+func (service userService) Create(params view.CreateUserView) error {
+	query := `
+		INSERT INTO user (first_name, last_name, role, email, password, phone, gender, address)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8); 
+	`
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(params.Password), 15)
+	if err != nil {
+		fmt.Printf("ERROR:: error hashing password: %s\n", err.Error())
+		return err
+	}
+	if _, err := service.db.Exec(query, &params.FirstName, &params.LastName, &params.Role, &params.Email,
+		&hashedPassword, &params.PhoneNumber, &params.Gender, &params.Address); err != nil {
+		fmt.Printf("ERROR:: could not insert to user table: %s\n", err.Error())
+		return err
+	}
+
+	return nil
 }

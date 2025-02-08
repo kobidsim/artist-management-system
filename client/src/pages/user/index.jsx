@@ -1,9 +1,12 @@
-import { Table } from "antd"
+import { Button, message, Modal, Table } from "antd"
 import axios from "axios"
 import { useEffect, useState } from "react"
+import UserForm from "./form"
 
 export default function UserPage() {
     const [userList, setUserList] = useState([])
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [messageApi, contextHolder] = message.useMessage()
 
     const listUsers = () => {
         const jwt = localStorage.getItem("jwt")
@@ -15,6 +18,27 @@ export default function UserPage() {
             setUserList(res.data.data)
         }).catch((error) => {
             console.log(error)
+        })
+    }
+
+    const createUser = (data) => {
+        const jwt = localStorage.getItem("jwt")
+        axios.post("http://localhost:8080/user", data, {
+            headers: {
+                Authorization: `Bearer ${jwt}`
+            }
+        }).then((res) => {
+            messageApi.open({
+                type: "success",
+                content: res?.data?.message,
+            })
+            setIsModalOpen()
+            listUsers()
+        }).catch((error) => {
+            messageApi.open({
+                type: "error",
+                content: error?.response?.data?.message,
+            })
         })
     }
 
@@ -95,6 +119,20 @@ export default function UserPage() {
 
     return(
         <>
+            {contextHolder}
+            <Button type="primary" onClick={() => setIsModalOpen(true)}>Create</Button>
+            <Modal
+                title={"Create User"}
+                open={isModalOpen}
+                onCancel={() => setIsModalOpen(false)}
+                footer={false}
+            >
+                <UserForm
+                    onCreate={(values) => {
+                        createUser(values)
+                    }}
+                />
+            </Modal>
             <Table
                 dataSource={userList}
                 columns={columns}

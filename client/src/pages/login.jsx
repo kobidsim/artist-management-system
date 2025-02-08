@@ -1,6 +1,5 @@
 import { Button, Card, Form, Input, message, notification } from "antd";
 import axios from "axios";
-import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 function Login() {
