@@ -11,7 +11,7 @@ type User struct {
 	Password  string
 	Phone     string
 	Dob       time.Time
-	Gender    byte
+	Gender    string
 	Address   string
 	CreatedAt time.Time
 	UpdatedAt time.Time

@@ -8,4 +8,5 @@ import (
 
 func SetupRoutes(app *echo.Echo, db *sql.DB) {
 	SetupRegisterRoutes(app, db)
+	SetupUserRoutes(app, db)
 }
