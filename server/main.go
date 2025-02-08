@@ -16,8 +16,7 @@ func main() {
 		app.Logger.Fatal(err.Error())
 	}
 	defer db.Close()
-
-	app.Use(middleware.CORS())
+	app.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
 	app.Validator = custom_validator.NewCustomValidator()
 
 	routes.SetupRoutes(app, db)
