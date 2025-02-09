@@ -40,7 +40,7 @@ func main() {
 			dob TEXT,
 			gender TEXT CHECK( gender IN ('m', 'f', 'o') ),
 			address VARCHAR(255),
-			first_release_year YEAR,
+			first_release_year TEXT,
 			no_of_albums_released INTEGER,
 			created_at TEXT,
 			updated_at TEXT

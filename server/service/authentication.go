@@ -79,5 +79,19 @@ func (service authenticationService) Register(params view.RegisterView) error {
 		return err
 	}
 
+	if params.Role == "artist" {
+		artistQuery := `
+			INSERT INTO artist (name, gender, address, first_release_year, no_of_albums_released)
+			VALUES ($1, $2, $3, $4, $5);
+		`
+		artistName := fmt.Sprintf("%s %s", params.FirstName, params.LastName)
+		noOfAlbums := 0
+		firstReleaseYear := ""
+
+		if _, err := service.db.Exec(artistQuery, &artistName, &params.Gender, &params.Address, &firstReleaseYear, &noOfAlbums); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
