@@ -15,7 +15,8 @@ type userService struct {
 
 type UserService interface {
 	All() ([]domain.User, error)
-	Create(params view.CreateUserView) error
+	Create(params view.UserView) error
+	Update(id int, params view.UserView) error
 }
 
 func NewUserService(db *sql.DB) UserService {
@@ -54,7 +55,7 @@ func (service userService) All() ([]domain.User, error) {
 	return users, nil
 }
 
-func (service userService) Create(params view.CreateUserView) error {
+func (service userService) Create(params view.UserView) error {
 	query := `
 		INSERT INTO user (first_name, last_name, role, email, password, phone, gender, address)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8); 
@@ -68,6 +69,38 @@ func (service userService) Create(params view.CreateUserView) error {
 	if _, err := service.db.Exec(query, &params.FirstName, &params.LastName, &params.Role, &params.Email,
 		&hashedPassword, &params.PhoneNumber, &params.Gender, &params.Address); err != nil {
 		fmt.Printf("ERROR:: could not insert to user table: %s\n", err.Error())
+		return err
+	}
+
+	return nil
+}
+
+func (service userService) Update(id int, params view.UserView) error {
+	getQuery := `
+		SELECT id, first_name, last_name, role, email, phone, gender, address FROM user WHERE id = $1;
+	`
+
+	var user domain.User
+	if err := service.db.QueryRow(getQuery, id).Scan(&user.ID, &user.FirstName, &user.LastName, &user.Role,
+		&user.Email, &user.Phone, &user.Gender, &user.Address); err != nil {
+		return err
+	}
+
+	user.FirstName = params.FirstName
+	user.LastName = params.LastName
+	user.Role = params.Role
+	user.Email = params.Email
+	user.Phone = params.PhoneNumber
+	user.Gender = params.Gender
+	user.Address = params.Address
+
+	updateQuery := `
+		UPDATE user
+		SET first_name = $1, last_name = $2, role = $3, email = $4, phone = $5, gender = $6, address = $7
+		WHERE id = $8
+	`
+	if _, err := service.db.Exec(updateQuery, &user.FirstName, &user.LastName, &user.Role, &user.Email, &user.Phone,
+		&user.Gender, &user.Address, &id); err != nil {
 		return err
 	}
 

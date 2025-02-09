@@ -1,4 +1,5 @@
-import { Button, message, Modal, Table } from "antd"
+import { Button, Flex, message, Modal, Table, Tooltip } from "antd"
+import { DeleteFilled, EditFilled } from "@ant-design/icons"
 import axios from "axios"
 import { useEffect, useState } from "react"
 import UserForm from "./form"
@@ -6,6 +7,7 @@ import UserForm from "./form"
 export default function UserPage() {
     const [userList, setUserList] = useState([])
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const [editData, setEditData] = useState(null)
     const [messageApi, contextHolder] = message.useMessage()
 
     const listUsers = () => {
@@ -32,7 +34,28 @@ export default function UserPage() {
                 type: "success",
                 content: res?.data?.message,
             })
-            setIsModalOpen()
+            setIsModalOpen(false)
+            listUsers()
+        }).catch((error) => {
+            messageApi.open({
+                type: "error",
+                content: error?.response?.data?.message,
+            })
+        })
+    }
+
+    const editUser = (data) => {
+        const jwt = localStorage.getItem("jwt")
+        axios.post(`http://localhost:8080/user/${editData.id}`, data, {
+            headers: {
+                Authorization: `Bearer ${jwt}`
+            }
+        }).then((res) => {
+            messageApi.open({
+                type: 'success',
+                content: res?.data?.message
+            })
+            setIsModalOpen(false)
             listUsers()
         }).catch((error) => {
             messageApi.open({
@@ -114,6 +137,33 @@ export default function UserPage() {
             title: "Address",
             dataIndex: 'address',
             key: 'address'
+        },
+        {
+            title: '',
+            dataIndex: '-',
+            render: (_, record) => (
+                <div
+                    style={{
+                        display: "flex",
+                        justifyContent: "space-around",
+                        alignItems: "center",
+                        gap: "8px",
+                    }}
+                >
+                    <Tooltip title="Edit">
+                        <Button
+                            icon={<EditFilled/>}
+                            onClick={() => {
+                                setEditData(record)
+                                setIsModalOpen(true)
+                            }}
+                        />
+                    </Tooltip>
+                    <Tooltip title="Delete">
+                        <Button icon={<DeleteFilled />} />
+                    </Tooltip>
+                </div>
+            )
         }
     ]
 
@@ -122,14 +172,22 @@ export default function UserPage() {
             {contextHolder}
             <Button type="primary" onClick={() => setIsModalOpen(true)}>Create</Button>
             <Modal
-                title={"Create User"}
+                title={!!editData ? "Edit User" : "Create User"}
                 open={isModalOpen}
-                onCancel={() => setIsModalOpen(false)}
+                onCancel={() => {
+                    setEditData(null)
+                    setIsModalOpen(false)
+                }}
                 footer={false}
             >
                 <UserForm
+                    isEdit={!!editData}
+                    editData={editData}
                     onCreate={(values) => {
                         createUser(values)
+                    }}
+                    onEdit={(values) => {
+                        editUser(values)
                     }}
                 />
             </Modal>

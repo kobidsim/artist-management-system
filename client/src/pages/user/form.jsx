@@ -1,16 +1,19 @@
 import { Button, DatePicker, Form, Input, Select } from "antd";
+import { useEffect } from "react";
 
-export default function UserForm({onCreate}) {
+export default function UserForm({isEdit, editData, onCreate, onEdit}) {
     const [form] = Form.useForm()
     const handleSumbit = (values) => {
-        onCreate(values)
+        isEdit ? onEdit(values) : onCreate(values)
     }
+    console.log(editData)
     return (
         <>
             <Form
                 form={form}
                 layout="vertical"
                 onFinish={handleSumbit}
+                initialValues={editData}
             >
                 <Form.Item
                     name={"first_name"}
@@ -108,7 +111,7 @@ export default function UserForm({onCreate}) {
                     <Input placeholder="Password" type="password" />
                 </Form.Item>
                 
-                <Button type="primary" htmlType="submit">Create</Button>
+                <Button type="primary" htmlType="submit">{isEdit ? "Edit" : "Create"}</Button>
             </Form>
         </>
     )

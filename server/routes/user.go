@@ -15,4 +15,5 @@ func SetupUserRoutes(app *echo.Echo, db *sql.DB) {
 
 	app.GET("/users", handler.List, middleware.AdminAuthMiddleware)
 	app.POST("/user", handler.Create, middleware.AdminAuthMiddleware)
+	app.POST("/user/:id", handler.Update, middleware.AdminAuthMiddleware)
 }

@@ -10,9 +10,9 @@ type User struct {
 	Email     string    `json:"email"`
 	Password  string    `json:"-"`
 	Phone     string    `json:"phone"`
-	Dob       time.Time `json:"dob"`
+	Dob       time.Time `json:"-"`
 	Gender    string    `json:"gender"`
 	Address   string    `json:"address"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	CreatedAt time.Time `json:"-"`
+	UpdatedAt time.Time `json:"-"`
 }
