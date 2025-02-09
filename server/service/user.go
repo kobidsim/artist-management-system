@@ -17,6 +17,7 @@ type UserService interface {
 	All() ([]domain.User, error)
 	Create(params view.UserView) error
 	Update(id int, params view.UserView) error
+	Delete(id int) error
 }
 
 func NewUserService(db *sql.DB) UserService {
@@ -77,12 +78,12 @@ func (service userService) Create(params view.UserView) error {
 
 func (service userService) Update(id int, params view.UserView) error {
 	getQuery := `
-		SELECT id, first_name, last_name, role, email, phone, gender, address FROM user WHERE id = $1;
+		SELECT id, first_name, last_name, role, email, phone, password, gender, address FROM user WHERE id = $1;
 	`
 
 	var user domain.User
 	if err := service.db.QueryRow(getQuery, id).Scan(&user.ID, &user.FirstName, &user.LastName, &user.Role,
-		&user.Email, &user.Phone, &user.Gender, &user.Address); err != nil {
+		&user.Email, &user.Phone, &user.Password, &user.Gender, &user.Address); err != nil {
 		return err
 	}
 
@@ -94,13 +95,31 @@ func (service userService) Update(id int, params view.UserView) error {
 	user.Gender = params.Gender
 	user.Address = params.Address
 
+	newHashedPassword, err := bcrypt.GenerateFromPassword([]byte(params.Password), 15)
+	if err != nil {
+		return err
+	}
+	user.Password = string(newHashedPassword)
+
 	updateQuery := `
 		UPDATE user
-		SET first_name = $1, last_name = $2, role = $3, email = $4, phone = $5, gender = $6, address = $7
-		WHERE id = $8
+		SET first_name = $1, last_name = $2, role = $3, email = $4, phone = $5, password = $6, gender = $7, address = $8
+		WHERE id = $9
 	`
 	if _, err := service.db.Exec(updateQuery, &user.FirstName, &user.LastName, &user.Role, &user.Email, &user.Phone,
-		&user.Gender, &user.Address, &id); err != nil {
+		&user.Password, &user.Gender, &user.Address, &id); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (service userService) Delete(id int) error {
+	query := `
+		DELETE FROM user WHERE id = $1
+	`
+
+	if _, err := service.db.Exec(query, &id); err != nil {
 		return err
 	}
 

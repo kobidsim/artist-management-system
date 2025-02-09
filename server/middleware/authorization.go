@@ -59,6 +59,8 @@ func AdminAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			})
 		}
 
+		ctx.Set("requestedByUserID", claims["id"])
+
 		return next(ctx)
 	}
 }

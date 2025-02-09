@@ -1,4 +1,4 @@
-import { Button, Flex, message, Modal, Table, Tooltip } from "antd"
+import { Button, Flex, message, Modal, Popconfirm, Table, Tooltip } from "antd"
 import { DeleteFilled, EditFilled } from "@ant-design/icons"
 import axios from "axios"
 import { useEffect, useState } from "react"
@@ -34,6 +34,7 @@ export default function UserPage() {
                 type: "success",
                 content: res?.data?.message,
             })
+            setEditData(null)
             setIsModalOpen(false)
             listUsers()
         }).catch((error) => {
@@ -55,12 +56,35 @@ export default function UserPage() {
                 type: 'success',
                 content: res?.data?.message
             })
+            setEditData(null)
             setIsModalOpen(false)
             listUsers()
         }).catch((error) => {
             messageApi.open({
                 type: "error",
                 content: error?.response?.data?.message,
+            })
+        })
+    }
+
+    const deleteUser = (id) => {
+        const jwt = localStorage.getItem("jwt")
+        axios.delete(`http://localhost:8080/user/${id}`, {
+            headers: {
+                Authorization: `Bearer ${jwt}`
+            }
+        }).then((res) => {
+            messageApi.open({
+                type: 'success',
+                content: res?.data?.message,
+            })
+            setEditData(null)
+            setIsModalOpen(false)
+            listUsers()
+        }).catch((error) => {
+            messageApi.open({
+                type: "error",
+                content: error?.response?.data?.message
             })
         })
     }
@@ -160,7 +184,13 @@ export default function UserPage() {
                         />
                     </Tooltip>
                     <Tooltip title="Delete">
-                        <Button icon={<DeleteFilled />} />
+                        <Popconfirm
+                            title="Delete User"
+                            description="Are you sure you want to delete this user?"
+                            onConfirm={() => deleteUser(record?.id)}
+                        >
+                            <Button icon={<DeleteFilled />} />
+                        </Popconfirm>
                     </Tooltip>
                 </div>
             )
