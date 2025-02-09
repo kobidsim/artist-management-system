@@ -1,0 +1,20 @@
+package routes
+
+import (
+	"artist-management-system/handler"
+	"artist-management-system/middleware"
+	"artist-management-system/service"
+	"database/sql"
+
+	"github.com/labstack/echo/v4"
+)
+
+func SetupMusicRoutes(app *echo.Echo, db *sql.DB) {
+	service := service.NewMusicService(db)
+	handler := handler.NewMusicHandler(service)
+
+	app.GET("/music", handler.List, middleware.AdminAuthMiddleware)
+	app.POST("/music", handler.Create, middleware.AdminAuthMiddleware)
+	app.POST("/music/:id", handler.Update, middleware.AdminAuthMiddleware)
+	app.DELETE("/music/:id", handler.Delete, middleware.AdminAuthMiddleware)
+}

@@ -2,32 +2,35 @@ import { Button, Flex, message, Modal, Popconfirm, Table, Tooltip } from "antd"
 import { DeleteFilled, EditFilled } from "@ant-design/icons"
 import axios from "axios"
 import { useEffect, useState } from "react"
-import ArtistForm from "./form"
-import { useNavigate } from "react-router-dom"
+import MusicForm from "./form"
+import { useParams } from "react-router-dom"
 
-export default function ArtistPage() {
-    const [artistList, setArtistList] = useState([])
+export default function MusicPage() {
+    const [musicList, setMusicList] = useState([])
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [editData, setEditData] = useState(null)
     const [messageApi, contextHolder] = message.useMessage()
-    const navigate = useNavigate()
+    const { artistID } = useParams()
 
-    const listArtists = () => {
+    const listMusic = (artistID) => {
         const jwt = localStorage.getItem("jwt")
-        axios.get("http://localhost:8080/artists", {
+        axios.get("http://localhost:8080/music", {
             headers: {
                 Authorization: `Bearer ${jwt}`
+            },
+            params: {
+                "artist_id": artistID,
             }
         }).then((res) => {
-            setArtistList(res.data.data)
+            setMusicList(res.data.data)
         }).catch((error) => {
             console.log(error)
         })
     }
 
-    const createArtist = (data) => {
+    const createMusic = (data) => {
         const jwt = localStorage.getItem("jwt")
-        axios.post("http://localhost:8080/artist", data, {
+        axios.post("http://localhost:8080/music", {...data, composed_by_id: artistID}, {
             headers: {
                 Authorization: `Bearer ${jwt}`
             }
@@ -38,7 +41,7 @@ export default function ArtistPage() {
             })
             setEditData(null)
             setIsModalOpen(false)
-            listArtists()
+            listMusic(artistID)
         }).catch((error) => {
             messageApi.open({
                 type: "error",
@@ -47,9 +50,10 @@ export default function ArtistPage() {
         })
     }
 
-    const editArtist = (data) => {
+    const editMusic = (data) => {
         const jwt = localStorage.getItem("jwt")
-        axios.post(`http://localhost:8080/artist/${editData.id}`, data, {
+        console.log("edit data api: ", editData)
+        axios.post(`http://localhost:8080/music/${editData.id}`, data, {
             headers: {
                 Authorization: `Bearer ${jwt}`
             }
@@ -60,7 +64,7 @@ export default function ArtistPage() {
             })
             setEditData(null)
             setIsModalOpen(false)
-            listArtists()
+            listMusic(artistID)
         }).catch((error) => {
             messageApi.open({
                 type: "error",
@@ -69,9 +73,9 @@ export default function ArtistPage() {
         })
     }
 
-    const deleteArtist = (id) => {
+    const deleteMusic = (id) => {
         const jwt = localStorage.getItem("jwt")
-        axios.delete(`http://localhost:8080/artist/${id}`, {
+        axios.delete(`http://localhost:8080/music/${id}`, {
             headers: {
                 Authorization: `Bearer ${jwt}`
             }
@@ -82,7 +86,7 @@ export default function ArtistPage() {
             })
             setEditData(null)
             setIsModalOpen(false)
-            listArtists()
+            listMusic(artistID)
         }).catch((error) => {
             messageApi.open({
                 type: "error",
@@ -92,54 +96,59 @@ export default function ArtistPage() {
     }
 
     useEffect(() => {
-        listArtists()
+        listMusic(artistID)
     }, [])
 
     const columns = [
         {
-            title: "Name",
-            dataIndex: "name",
-            key: 'name',
+            title: "Title",
+            dataIndex: "title",
+            key: 'title',
         },
         {
-            title: "Gender",
+            title: "Album Name",
+            dataIndex: "album_name",
+            key: 'album_name',
+        },
+        {
+            title: "Genre",
             render: (_, record) => {
-                let gender = "-"
-                switch (record?.gender) {
-                    case "m":
-                        gender = "Male"
+                let genre = ""
+                switch (record?.genre) {
+                    case "rnb":
+                        genre = "Rnb"
                         break;
                     
-                    case "f":
-                        gender = "Female"
+                    case "country":
+                        genre = "Country"
+                        break;
+                    
+                    case "classic":
+                        genre = "Classic"
                         break;
 
-                    case "o":
-                        gender = "Other"
+                    case "rock":
+                        genre = "Rock"
+                        break;
+
+                    case "jazz":
+                        genre = "Jazz"
                         break;
                 
                     default:
                         break;
                 }
 
-                return gender
+                return genre
             },
-            key: 'gender',
+            key: 'genre'
         },
         {
-            title: "Address",
-            dataIndex: 'address',
-            key: 'address'
-        },
-        {
-            title: "First Release Year",
-            dataIndex: 'first_release_year',
+            title: "Composed By",
+            render: (_, record) => {
+                return record?.artist?.name
+            },
             key: 'first_release_year',
-        },
-        {
-            title: "No of Albums Released",
-            dataIndex: "no_of_albums_released",
-            key: "no_of_albums_released",
         },
         {
             title: '',
@@ -156,8 +165,7 @@ export default function ArtistPage() {
                     <Tooltip title="Edit">
                         <Button
                             icon={<EditFilled/>}
-                            onClick={(e) => {
-                                e.stopPropagation()
+                            onClick={() => {
                                 setEditData(record)
                                 setIsModalOpen(true)
                             }}
@@ -165,16 +173,11 @@ export default function ArtistPage() {
                     </Tooltip>
                     <Tooltip title="Delete">
                         <Popconfirm
-                            title="Delete Artist"
-                            description="Are you sure you want to delete this artist?"
-                            onConfirm={(e) => {
-                                e.stopPropagation()
-                                deleteArtist(record?.id)
-                            }}
-                            onCancel={(e) => e.stopPropagation()}
-                            onPopupClick={(e) => e.stopPropagation()}
+                            title="Delete Music"
+                            description="Are you sure you want to delete this music?"
+                            onConfirm={() => deleteMusic(record?.id)}
                         >
-                            <Button onClick={(e) => e.stopPropagation()} icon={<DeleteFilled />} />
+                            <Button icon={<DeleteFilled />} />
                         </Popconfirm>
                     </Tooltip>
                 </div>
@@ -187,7 +190,7 @@ export default function ArtistPage() {
             {contextHolder}
             <Button type="primary" onClick={() => setIsModalOpen(true)}>Create</Button>
             <Modal
-                title={!!editData ? "Edit Artist" : "Create Artist"}
+                title={!!editData ? "Edit Music" : "Create Music"}
                 open={isModalOpen}
                 onCancel={() => {
                     setEditData(null)
@@ -200,26 +203,20 @@ export default function ArtistPage() {
                 footer={false}
                 destroyOnClose
             >
-                <ArtistForm
+                <MusicForm
                     isEdit={!!editData}
                     editData={editData}
                     onCreate={(values) => {
-                        setEditData(null)
-                        createArtist(values)
+                        createMusic(values)
                     }}
                     onEdit={(values) => {
-                        editArtist(values)
+                        editMusic(values)
                     }}
                 />
             </Modal>
             <Table
-                dataSource={artistList}
+                dataSource={musicList}
                 columns={columns}
-                onRow={(record) => ({
-                    onClick: () => {
-                        navigate(`/dashboard/artist/${record?.id}`)
-                    }
-                })}
                 pagination={{
                     position: "bottomRight",
                     defaultPageSize: 10,

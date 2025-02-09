@@ -3,6 +3,7 @@ import ProtectedRoute from "../components/protectedroute"
 import UserPage from "./user"
 import ArtistPage from "./artist"
 import { Content, Header } from "antd/es/layout/layout"
+import MusicPage from "./music"
 
 export default function Dashboard() {
     const role = localStorage.getItem("role")
@@ -48,6 +49,11 @@ export default function Dashboard() {
                     <Route path="artists" element={
                         <ProtectedRoute role={role} route={"/artists"}>
                             <ArtistPage />
+                        </ProtectedRoute>
+                    } />
+                    <Route path="artist/:artistID" element={
+                        <ProtectedRoute role={role} route={"/artist"}>
+                            <MusicPage />
                         </ProtectedRoute>
                     } />
                 </Routes>

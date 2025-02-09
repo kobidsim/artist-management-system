@@ -1,8 +1,8 @@
 import { Navigate } from "react-router-dom"
 
 const allowedRoutes = {
-    "super_admin": ["/users", "/artists", "artist"],
-    "artist_manager": ["/artists", "artist"],
+    "super_admin": ["/users", "/artists", "/artist"],
+    "artist_manager": ["/artists", "/artist"],
     "artist": ["/artist"]
 
 }

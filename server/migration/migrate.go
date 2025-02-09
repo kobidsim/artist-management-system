@@ -47,6 +47,7 @@ func main() {
 		);
 
 		CREATE TABLE IF NOT EXISTS music (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			title VARCHAR(255),
 			artist_id INTEGER,
 			album_name VARCHAR(255),

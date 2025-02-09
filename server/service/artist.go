@@ -82,10 +82,16 @@ func (service artistService) Update(id int, params view.ArtistView) error {
 }
 
 func (service artistService) Delete(id int) error {
+	deleteMusicQuery := `
+		DELETE FROM music WHERE artist_id = $1
+	`
+	if _, err := service.db.Exec(deleteMusicQuery, &id); err != nil {
+		return err
+	}
+
 	query := `
 		DELETE FROM artist WHERE id = $1
 	`
-
 	if _, err := service.db.Exec(query, &id); err != nil {
 		return err
 	}
