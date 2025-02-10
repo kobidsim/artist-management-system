@@ -1,5 +1,5 @@
-import { Button, Flex, message, Modal, Popconfirm, Table, Tooltip } from "antd"
-import { DeleteFilled, EditFilled } from "@ant-design/icons"
+import { Button, Flex, FloatButton, message, Modal, Popconfirm, Table, Tooltip } from "antd"
+import { DeleteFilled, EditFilled, PlusOutlined } from "@ant-design/icons"
 import axios from "axios"
 import { useEffect, useState } from "react"
 import UserForm from "./form"
@@ -200,7 +200,15 @@ export default function UserPage() {
     return(
         <>
             {contextHolder}
-            <Button type="primary" onClick={() => setIsModalOpen(true)}>Create</Button>
+            <h4
+                style={{
+                    padding: "20px 20px",
+                    margin: "0"
+                }}
+            >
+                Users
+            </h4>
+            <Tooltip title="Create User"><FloatButton type="primary" icon={<PlusOutlined />} onClick={() => setIsModalOpen(true)} /></Tooltip>
             <Modal
                 title={!!editData ? "Edit User" : "Create User"}
                 open={isModalOpen}

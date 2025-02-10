@@ -1,9 +1,9 @@
-import { Button, Flex, message, Modal, Popconfirm, Table, Tooltip } from "antd"
-import { DeleteFilled, EditFilled } from "@ant-design/icons"
+import { Button, Flex, FloatButton, message, Modal, Popconfirm, Table, Tooltip } from "antd"
+import { DeleteFilled, EditFilled, PlusOutlined } from "@ant-design/icons"
 import axios from "axios"
 import { useEffect, useState } from "react"
 import MusicForm from "./form"
-import { useParams } from "react-router-dom"
+import { useLocation, useParams } from "react-router-dom"
 
 export default function MusicPage() {
     const [musicList, setMusicList] = useState([])
@@ -11,6 +11,7 @@ export default function MusicPage() {
     const [editData, setEditData] = useState(null)
     const [messageApi, contextHolder] = message.useMessage()
     const { artistID } = useParams()
+    const { state } = useLocation()
 
     const listMusic = (artistID) => {
         const jwt = localStorage.getItem("jwt")
@@ -188,7 +189,15 @@ export default function MusicPage() {
     return(
         <>
             {contextHolder}
-            <Button type="primary" onClick={() => setIsModalOpen(true)}>Create</Button>
+            {state && <h4
+                style={{
+                    padding: "20px 20px",
+                    margin: "0"
+                }}
+            >
+                {state?.name}'s music
+            </h4>}
+            <Tooltip title="Create Music"><FloatButton type="primary" icon={<PlusOutlined/>} onClick={() => setIsModalOpen(true)} /></Tooltip>
             <Modal
                 title={!!editData ? "Edit Music" : "Create Music"}
                 open={isModalOpen}

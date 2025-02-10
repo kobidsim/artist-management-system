@@ -1,5 +1,5 @@
-import { Button, Flex, message, Modal, Popconfirm, Table, Tooltip } from "antd"
-import { DeleteFilled, DownloadOutlined, EditFilled, UploadOutlined } from "@ant-design/icons"
+import { Button, Flex, FloatButton, message, Modal, Popconfirm, Table, Tooltip } from "antd"
+import { DeleteFilled, DownloadOutlined, EditFilled, PlusOutlined, UploadOutlined } from "@ant-design/icons"
 import axios from "axios"
 import { useEffect, useRef, useState } from "react"
 import ArtistForm from "./form"
@@ -239,9 +239,25 @@ export default function ArtistPage({isManager}) {
     return(
         <>
             {contextHolder}
-            {isManager && <Button type="primary" onClick={() => setIsModalOpen(true)}>Create</Button>}
-            {isManager && <><Button onClick={handleCsvImport}><UploadOutlined /> Import CSV</Button><input ref={filePickerRef} onChange={handleFileChange} style={{display: "none"}} type="file"></input></>}
-            {isManager && <Button onClick={exportCSV}><DownloadOutlined /> Export CSV</Button>}
+            {isManager && <Tooltip title="Create Artist"><FloatButton type="primary" icon={<PlusOutlined />} onClick={() => setIsModalOpen(true)} /></Tooltip>}
+            <div
+                style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    padding: "0 20px"
+                }}
+            >
+                <h4
+                    style={{
+                        
+                    }}
+                >Artists</h4>
+                <div style={{display: "flex", gap: "10px"}}>
+                    {isManager && <><Button onClick={handleCsvImport}><UploadOutlined /> Import CSV</Button><input ref={filePickerRef} onChange={handleFileChange} style={{display: "none"}} type="file"></input></>}
+                    {isManager && <Button onClick={exportCSV}><DownloadOutlined /> Export CSV</Button>}
+                </div>
+            </div>
             {isManager &&
             <Modal
                 title={!!editData ? "Edit Artist" : "Create Artist"}
@@ -270,11 +286,12 @@ export default function ArtistPage({isManager}) {
                 />
             </Modal>}
             <Table
+                className="artist-table"
                 dataSource={artistList}
                 columns={columns}
                 onRow={(record) => ({
                     onClick: () => {
-                        navigate(`/dashboard/artist/${record?.id}`)
+                        navigate(`/dashboard/artist/${record?.id}`, {state: {name: record?.name}})
                     }
                 })}
                 pagination={{
