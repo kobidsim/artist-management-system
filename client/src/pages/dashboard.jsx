@@ -48,7 +48,7 @@ export default function Dashboard() {
                     } />
                     <Route path="artists" element={
                         <ProtectedRoute role={role} route={"/artists"}>
-                            <ArtistPage />
+                            <ArtistPage isManager={role === 'super_admin' || role === 'artist_manager'} />
                         </ProtectedRoute>
                     } />
                     <Route path="artist/:artistID" element={

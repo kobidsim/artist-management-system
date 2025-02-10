@@ -5,7 +5,7 @@ import { useEffect, useState } from "react"
 import ArtistForm from "./form"
 import { useNavigate } from "react-router-dom"
 
-export default function ArtistPage() {
+export default function ArtistPage({isManager}) {
     const [artistList, setArtistList] = useState([])
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [editData, setEditData] = useState(null)
@@ -141,7 +141,7 @@ export default function ArtistPage() {
             dataIndex: "no_of_albums_released",
             key: "no_of_albums_released",
         },
-        {
+        (isManager ? {
             title: '',
             dataIndex: '-',
             render: (_, record) => (
@@ -179,13 +179,14 @@ export default function ArtistPage() {
                     </Tooltip>
                 </div>
             )
-        }
+        }: {})
     ]
 
     return(
         <>
             {contextHolder}
-            <Button type="primary" onClick={() => setIsModalOpen(true)}>Create</Button>
+            {isManager && <Button type="primary" onClick={() => setIsModalOpen(true)}>Create</Button>}
+            {isManager &&
             <Modal
                 title={!!editData ? "Edit Artist" : "Create Artist"}
                 open={isModalOpen}
@@ -211,7 +212,7 @@ export default function ArtistPage() {
                         editArtist(values)
                     }}
                 />
-            </Modal>
+            </Modal>}
             <Table
                 dataSource={artistList}
                 columns={columns}
