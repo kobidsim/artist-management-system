@@ -66,10 +66,16 @@ func (handler artistHandler) Create(ctx echo.Context) error {
 
 	dob, err := time.Parse("2006-01-02T15:04:05.000Z", params.Dob)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, "dob is invalid")
+		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error":   true,
+			"message": "DOB is invalid",
+		})
 	}
 	if dob.After(time.Now().UTC()) {
-		return ctx.JSON(http.StatusBadRequest, "dob can not be in the future")
+		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error":   true,
+			"message": "DOB can not be in the future",
+		})
 	}
 
 	if err := handler.artistService.Create(params); err != nil {
