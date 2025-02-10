@@ -19,6 +19,8 @@ type ArtistHandler interface {
 	Create(ctx echo.Context) error
 	Update(ctx echo.Context) error
 	Delete(ctx echo.Context) error
+	CSVImport(ctx echo.Context) error
+	CSVExport(ctx echo.Context) error
 }
 
 func NewArtistHandler(artistService service.ArtistService) ArtistHandler {
@@ -138,4 +140,53 @@ func (handler artistHandler) Delete(ctx echo.Context) error {
 		"error":   false,
 		"message": "Deleted artist successfully",
 	})
+}
+
+func (handler artistHandler) CSVImport(ctx echo.Context) error {
+	form, err := ctx.MultipartForm()
+	if err != nil || form == nil {
+		fmt.Printf("ERROR:: error getting form: %s\n", err.Error())
+		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error":   true,
+			"message": "Bad request",
+		})
+	}
+
+	fileHeader := form.File["csv_file"][0]
+	file, err := fileHeader.Open()
+	if err != nil {
+		fmt.Printf("ERROR:: error opening file: %s\n", err.Error())
+		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error":   true,
+			"message": "Could not open file",
+		})
+	}
+	defer file.Close()
+
+	if err := handler.artistService.CSVImport(file); err != nil {
+		fmt.Printf("ERROR:: error reading file: %s\n", err.Error())
+		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error":   true,
+			"message": "Error reading file. File may not be a csv",
+		})
+	}
+
+	return ctx.JSON(http.StatusOK, map[string]interface{}{
+		"error":   false,
+		"message": "File accepted",
+	})
+}
+
+func (handler artistHandler) CSVExport(ctx echo.Context) error {
+	csvBuffer, err := handler.artistService.CSVExport()
+	if err != nil {
+		fmt.Printf("ERROR:: error exporting: %s\n", err.Error())
+		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error":   true,
+			"message": "Error exporting csv",
+		})
+	}
+
+	ctx.Response().Header().Set("Content-Disposition", "attachment; filename=artists.csv")
+	return ctx.Blob(http.StatusOK, "text/csv", csvBuffer.Bytes())
 }

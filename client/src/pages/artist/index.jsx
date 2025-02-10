@@ -1,7 +1,7 @@
 import { Button, Flex, message, Modal, Popconfirm, Table, Tooltip } from "antd"
-import { DeleteFilled, EditFilled } from "@ant-design/icons"
+import { DeleteFilled, DownloadOutlined, EditFilled, UploadOutlined } from "@ant-design/icons"
 import axios from "axios"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import ArtistForm from "./form"
 import { useNavigate } from "react-router-dom"
 
@@ -10,7 +10,9 @@ export default function ArtistPage({isManager}) {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [editData, setEditData] = useState(null)
     const [messageApi, contextHolder] = message.useMessage()
+    const [csvFile, setCsvFile] = useState(null)
     const navigate = useNavigate()
+    const filePickerRef = useRef(null)
 
     const listArtists = () => {
         const jwt = localStorage.getItem("jwt")
@@ -87,6 +89,58 @@ export default function ArtistPage({isManager}) {
             messageApi.open({
                 type: "error",
                 content: error?.response?.data?.message
+            })
+        })
+    }
+
+    const exportCSV = () => {
+        console.log("Hello exporting")
+        const jwt = localStorage.getItem("jwt")
+        axios.get(`http://localhost:8080/artist/csv-export`, {
+            headers: {
+                Authorization: `Bearer ${jwt}`
+            }
+        }).then((res) => {
+            const url = window.URL.createObjectURL(new Blob([res.data]))
+            const link = document.createElement('a')
+            link.href = url
+            link.setAttribute('download', 'artists.csv')
+            document.body.appendChild(link)
+            link.click()
+            link.remove()
+        }).catch((error) => {
+            console.log(error)
+        })
+    }
+
+    const handleCsvImport = (e) => {
+        filePickerRef.current.click()
+    }
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0]
+        if (!file) return
+        
+        console.log("filename: ", file.name)
+
+        const formData = new FormData()
+        formData.append("csv_file", file)
+
+        const jwt = localStorage.getItem("jwt")
+        axios.post("http://localhost:8080/artist/csv-import", formData, {
+            headers: {
+                Authorization: `Bearer ${jwt}`
+            }
+        }).then((res) => {
+            messageApi.open({
+                type: 'success',
+                content: res?.data?.message
+            })
+            listArtists()
+        }).catch((error) => {
+            messageApi.open({
+                type: "error",
+                content: error?.response?.data?.message,
             })
         })
     }
@@ -186,6 +240,8 @@ export default function ArtistPage({isManager}) {
         <>
             {contextHolder}
             {isManager && <Button type="primary" onClick={() => setIsModalOpen(true)}>Create</Button>}
+            {isManager && <><Button onClick={handleCsvImport}><UploadOutlined /> Import CSV</Button><input ref={filePickerRef} onChange={handleFileChange} style={{display: "none"}} type="file"></input></>}
+            {isManager && <Button onClick={exportCSV}><DownloadOutlined /> Export CSV</Button>}
             {isManager &&
             <Modal
                 title={!!editData ? "Edit Artist" : "Create Artist"}

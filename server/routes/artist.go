@@ -15,6 +15,8 @@ func SetupArtistRoutes(app *echo.Echo, db *sql.DB) {
 
 	app.GET("/artists", handler.List)
 	app.POST("/artist", handler.Create, middleware.AdminManagerAuthMiddleware)
+	app.POST("/artist/csv-import", handler.CSVImport, middleware.AdminManagerAuthMiddleware)
+	app.GET("/artist/csv-export", handler.CSVExport, middleware.AdminManagerAuthMiddleware)
 	app.POST("/artist/:id", handler.Update, middleware.AdminManagerAuthMiddleware)
 	app.DELETE("/artist/:id", handler.Delete, middleware.AdminManagerAuthMiddleware)
 }
