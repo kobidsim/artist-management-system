@@ -6,6 +6,7 @@ import { Content, Header } from "antd/es/layout/layout"
 import MusicPage from "./music"
 import axios from "axios"
 import { message } from "antd"
+import NotFound from "./notfound"
 
 export default function Dashboard() {
     const role = localStorage.getItem("role")
@@ -83,6 +84,7 @@ export default function Dashboard() {
                             <MusicPage />
                         </ProtectedRoute>
                     } />
+                    <Route path='*' element={<NotFound/>}/>
                 </Routes>
             </Content>
         </>

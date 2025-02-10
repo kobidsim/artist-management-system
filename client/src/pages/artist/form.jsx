@@ -26,11 +26,25 @@ export default function ArtistForm({isEdit, editData, onCreate, onEdit}) {
                     <Input placeholder="Name"/>
                 </Form.Item>
 
-                <Form.Item name={"dob"}>
+                <Form.Item name={"dob"}
+                    rules={[
+                        {
+                            required: true,
+                            message: 'Field is required.'
+                        }
+                    ]}
+                >
                     <DatePicker placeholder="Date of Birth"/>
                 </Form.Item>
 
-                <Form.Item name={"gender"}>
+                <Form.Item name={"gender"}
+                    rules={[
+                        {
+                            required: true,
+                            message: 'Field is required.'
+                        }
+                    ]}
+                >
                     <Select
                         placeholder="Gender"
                         options={[
@@ -50,15 +64,36 @@ export default function ArtistForm({isEdit, editData, onCreate, onEdit}) {
                     />
                 </Form.Item>
 
-                <Form.Item name={"address"}>
+                <Form.Item name={"address"}
+                    rules={[
+                        {
+                            required: true,
+                            message: 'Field is required.'
+                        }
+                    ]}
+                >
                     <Input placeholder="Address"/>
                 </Form.Item>
 
-                <Form.Item name={"first_release_year"}>
+                <Form.Item name={"first_release_year"}
+                    rules={[
+                        {
+                            required: true,
+                            message: 'Field is required.'
+                        }
+                    ]}
+                >
                     <Input placeholder="First release year"/>
                 </Form.Item>
 
-                <Form.Item name={"no_of_albums_released"}>
+                <Form.Item name={"no_of_albums_released"}
+                    rules={[
+                        {
+                            required: true,
+                            message: 'Field is required.'
+                        }
+                    ]}
+                >
                     <InputNumber min={0} placeholder="No of Albums released"/>
                 </Form.Item>
                 

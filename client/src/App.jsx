@@ -4,6 +4,7 @@ import Login from './pages/login'
 import Register from './pages/register'
 import Dashboard from './pages/dashboard'
 import Unauthorized from './pages/unauthorized'
+import NotFound from './pages/notfound'
 
 function App() {
 
@@ -23,6 +24,8 @@ function App() {
         } />
 
         <Route path='/unauthorized' element={<Unauthorized/>} />
+        
+        <Route path='*' element={<NotFound/>}/>
       </Routes>
     </>
   )

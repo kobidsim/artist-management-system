@@ -141,9 +141,6 @@ function Register() {
                     <Form.Item name={"password"}>
                         <Input placeholder="Password" type="password" />
                     </Form.Item>
-                    <Form.Item name={"confirm_password"}>
-                        <Input placeholder="Confirm Password" type="password" />
-                    </Form.Item>
                     <Button type="primary" htmlType="submit">Register</Button>
                     <Link to={"/"}>Login?</Link>
                 </Form>

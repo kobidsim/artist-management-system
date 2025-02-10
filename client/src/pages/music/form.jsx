@@ -26,11 +26,25 @@ export default function MusicForm({isEdit, editData, onCreate, onEdit}) {
                     <Input placeholder="Title"/>
                 </Form.Item>
 
-                <Form.Item name={"album_name"}>
+                <Form.Item name={"album_name"}
+                    rules={[
+                        {
+                            required: true,
+                            message: 'Field is required.'
+                        }
+                    ]}
+                >
                     <Input placeholder="Album Name"/>
                 </Form.Item>
 
-                <Form.Item name={"genre"}>
+                <Form.Item name={"genre"}
+                    rules={[
+                        {
+                            required: true,
+                            message: 'Field is required.'
+                        }
+                    ]}
+                >
                     <Select
                         placeholder="Genre"
                         options={[

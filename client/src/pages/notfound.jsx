@@ -1,4 +1,4 @@
-export default function Unauthorized() {
+export default function NotFound() {
     return (
         <div
             style={{
@@ -7,7 +7,7 @@ export default function Unauthorized() {
                 alignItems: "center",
             }}
         >
-            <h2>You are unauthorized</h2>
+            <h2>Page not found</h2>
         </div>
     )
 }

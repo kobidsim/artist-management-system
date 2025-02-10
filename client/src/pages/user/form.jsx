@@ -55,15 +55,36 @@ export default function UserForm({isEdit, editData, onCreate, onEdit}) {
                     <Input placeholder="Email"/>
                 </Form.Item>
 
-                <Form.Item name={"phone_number"}>
+                <Form.Item name={"phone_number"}
+                    rules={[
+                        {
+                            required: true,
+                            message: 'Role is required.'
+                        }
+                    ]}
+                >
                     <Input placeholder="Phone Number"/>
                 </Form.Item>
 
-                <Form.Item name={"dob"}>
+                <Form.Item name={"dob"}
+                    rules={[
+                        {
+                            required: true,
+                            message: 'Role is required.'
+                        }
+                    ]}
+                >
                     <DatePicker placeholder="Date of Birth"/>
                 </Form.Item>
 
-                <Form.Item name={"gender"}>
+                <Form.Item name={"gender"}
+                    rules={[
+                        {
+                            required: true,
+                            message: 'Role is required.'
+                        }
+                    ]}
+                >
                     <Select
                         placeholder="Gender"
                         options={[
@@ -83,11 +104,25 @@ export default function UserForm({isEdit, editData, onCreate, onEdit}) {
                     />
                 </Form.Item>
 
-                <Form.Item name={"address"}>
+                <Form.Item name={"address"}
+                    rules={[
+                        {
+                            required: true,
+                            message: 'Role is required.'
+                        }
+                    ]}
+                >
                     <Input placeholder="Address"/>
                 </Form.Item>
 
-                <Form.Item name={"role"}>
+                <Form.Item name={"role"}
+                    rules={[
+                        {
+                            required: true,
+                            message: 'Role is required.'
+                        }
+                    ]}                
+                >
                     <Select
                         placeholder="Role"
                         options={[
@@ -107,7 +142,14 @@ export default function UserForm({isEdit, editData, onCreate, onEdit}) {
                     />
                 </Form.Item>
                 
-                <Form.Item name={"password"}>
+                <Form.Item name={"password"}
+                    rules={[
+                        {
+                            required: true,
+                            message: 'Password is required.'
+                        }
+                    ]}
+                >
                     <Input placeholder="Password" type="password" />
                 </Form.Item>
                 
