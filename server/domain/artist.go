@@ -5,7 +5,7 @@ import "time"
 type Artist struct {
 	ID                 int       `json:"id"`
 	Name               string    `json:"name"`
-	Dob                time.Time `json:"-"`
+	Dob                string    `json:"-"`
 	Gender             string    `json:"gender"`
 	Address            string    `json:"address"`
 	FirstReleaseYear   string    `json:"first_release_year"`

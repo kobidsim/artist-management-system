@@ -209,6 +209,7 @@ export default function UserPage() {
                     setIsModalOpen(false)
                 }}
                 footer={false}
+                destroyOnClose
             >
                 <UserForm
                     isEdit={!!editData}

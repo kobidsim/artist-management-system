@@ -74,11 +74,16 @@ func (service authenticationService) Login(params view.LoginView) (map[string]in
 }
 
 func (service authenticationService) Register(params view.RegisterView) error {
-	//TODO::need to find date time format compatible with client, server and db
-	//so skipping date fields for now
+	dob, err := time.Parse("2006-01-02T15:04:05.000Z", params.DOB)
+	if err != nil {
+		return err
+	}
+
+	createdAt := time.Now().UTC().Format("2006-01-02T15:04:05.000Z")
+
 	query := `
-		INSERT INTO user (first_name, last_name, role, email, password, phone, gender, address)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
+		INSERT INTO user (first_name, last_name, role, email, password, phone, gender, address, dob, created_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);
 	`
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(params.Password), 15)
@@ -86,7 +91,7 @@ func (service authenticationService) Register(params view.RegisterView) error {
 		return err
 	}
 	if _, err := service.db.Exec(query, params.FirstName, params.LastName, params.Role,
-		params.Email, string(hashedPassword), params.PhoneNumber, params.Gender, params.Address); err != nil {
+		params.Email, string(hashedPassword), params.PhoneNumber, params.Gender, params.Address, dob, createdAt); err != nil {
 		return err
 	}
 

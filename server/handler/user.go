@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/labstack/echo/v4"
 )
@@ -59,6 +60,14 @@ func (handler userHandler) Create(ctx echo.Context) error {
 		})
 	}
 
+	dob, err := time.Parse("2006-01-02T15:04:05.000Z", params.DOB)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, "dob is invalid")
+	}
+	if dob.After(time.Now().UTC()) {
+		return ctx.JSON(http.StatusBadRequest, "dob can not be in the future")
+	}
+
 	if err := handler.userService.Create(params); err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error":   true,
@@ -97,6 +106,14 @@ func (handler userHandler) Update(ctx echo.Context) error {
 			"error":   true,
 			"message": "Validation Error",
 		})
+	}
+
+	dob, err := time.Parse("2006-01-02T15:04:05.000Z", params.DOB)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, "dob is invalid")
+	}
+	if dob.After(time.Now().UTC()) {
+		return ctx.JSON(http.StatusBadRequest, "dob can not be in the future")
 	}
 
 	if err := handler.userService.Update(id, params); err != nil {

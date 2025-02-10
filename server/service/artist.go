@@ -12,6 +12,7 @@ import (
 	"mime/multipart"
 	"slices"
 	"strconv"
+	"time"
 )
 
 type artistService struct {
@@ -35,7 +36,7 @@ func NewArtistService(db *sql.DB) ArtistService {
 
 func (service artistService) All() ([]domain.Artist, error) {
 	query := `
-		SELECT id, name, gender, address, first_release_year, no_of_albums_released FROM artist;
+		SELECT id, name, gender, address, first_release_year, no_of_albums_released, dob FROM artist;
 	`
 
 	var artists []domain.Artist
@@ -48,7 +49,7 @@ func (service artistService) All() ([]domain.Artist, error) {
 
 	for rows.Next() {
 		var artist domain.Artist
-		if err := rows.Scan(&artist.ID, &artist.Name, &artist.Gender, &artist.Address, &artist.FirstReleaseYear, &artist.NoOfAlbumsReleased); err != nil {
+		if err := rows.Scan(&artist.ID, &artist.Name, &artist.Gender, &artist.Address, &artist.FirstReleaseYear, &artist.NoOfAlbumsReleased, &artist.Dob); err != nil {
 			fmt.Printf("ERROR:: could not scan values from row: %s\n", err.Error())
 			return nil, err
 		}
@@ -64,12 +65,14 @@ func (service artistService) All() ([]domain.Artist, error) {
 }
 
 func (service artistService) Create(params view.ArtistView) error {
+	createdAt := time.Now().UTC().Format("2006-01-02T15:04:05.000Z")
+
 	query := `
-		INSERT INTO artist (name, gender, address, first_release_year, no_of_albums_released)
-		VALUES ($1, $2, $3, $4, $5);
+		INSERT INTO artist (name, gender, address, first_release_year, no_of_albums_released, dob, created_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7);
 	`
 
-	if _, err := service.db.Exec(query, &params.Name, &params.Gender, &params.Address, &params.FirstReleaseYear, &params.NoOfAlbumsReleased); err != nil {
+	if _, err := service.db.Exec(query, &params.Name, &params.Gender, &params.Address, &params.FirstReleaseYear, &params.NoOfAlbumsReleased, &params.Dob, &createdAt); err != nil {
 		fmt.Printf("ERROR:: could not insert to artist table: %s\n", err.Error())
 		return err
 	}
@@ -78,12 +81,14 @@ func (service artistService) Create(params view.ArtistView) error {
 }
 
 func (service artistService) Update(id int, params view.ArtistView) error {
+	updatedAt := time.Now().UTC().Format("2006-01-02T15:04:05.000Z")
+
 	updateQuery := `
 		UPDATE artist
-		SET name = $1, gender = $2, address = $3, first_release_year = $4, no_of_albums_released = $5
-		WHERE id = $6
+		SET name = $1, gender = $2, address = $3, first_release_year = $4, no_of_albums_released = $5, dob = $6, updated_at = $7
+		WHERE id = $8
 	`
-	if _, err := service.db.Exec(updateQuery, &params.Name, &params.Gender, &params.Address, &params.FirstReleaseYear, &params.NoOfAlbumsReleased, &id); err != nil {
+	if _, err := service.db.Exec(updateQuery, &params.Name, &params.Gender, &params.Address, &params.FirstReleaseYear, &params.NoOfAlbumsReleased, &params.Dob, &updatedAt, &id); err != nil {
 		return err
 	}
 

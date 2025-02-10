@@ -5,6 +5,7 @@ import (
 	"artist-management-system/view"
 	"database/sql"
 	"fmt"
+	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -28,7 +29,7 @@ func NewUserService(db *sql.DB) UserService {
 
 func (service userService) All() ([]domain.User, error) {
 	query := `
-		SELECT id, first_name, last_name, role, email, phone, gender, address FROM user;
+		SELECT id, first_name, last_name, role, email, phone, gender, address, dob FROM user;
 	`
 
 	var users []domain.User
@@ -41,7 +42,7 @@ func (service userService) All() ([]domain.User, error) {
 
 	for rows.Next() {
 		var user domain.User
-		if err := rows.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Role, &user.Email, &user.Phone, &user.Gender, &user.Address); err != nil {
+		if err := rows.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Role, &user.Email, &user.Phone, &user.Gender, &user.Address, &user.Dob); err != nil {
 			fmt.Printf("ERROR:: could not scan values from row: %s\n", err.Error())
 			return nil, err
 		}
@@ -57,9 +58,16 @@ func (service userService) All() ([]domain.User, error) {
 }
 
 func (service userService) Create(params view.UserView) error {
+	dob, err := time.Parse("2006-01-02T15:04:05.000Z", params.DOB)
+	if err != nil {
+		return err
+	}
+
+	createdAt := time.Now().UTC().Format("2006-01-02T15:04:05.000Z")
+
 	query := `
-		INSERT INTO user (first_name, last_name, role, email, password, phone, gender, address)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8); 
+		INSERT INTO user (first_name, last_name, role, email, password, phone, gender, address, dob, created_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10); 
 	`
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(params.Password), 15)
@@ -68,7 +76,7 @@ func (service userService) Create(params view.UserView) error {
 		return err
 	}
 	if _, err := service.db.Exec(query, &params.FirstName, &params.LastName, &params.Role, &params.Email,
-		&hashedPassword, &params.PhoneNumber, &params.Gender, &params.Address); err != nil {
+		&hashedPassword, &params.PhoneNumber, &params.Gender, &params.Address, &dob, &createdAt); err != nil {
 		fmt.Printf("ERROR:: could not insert to user table: %s\n", err.Error())
 		return err
 	}
@@ -77,6 +85,13 @@ func (service userService) Create(params view.UserView) error {
 }
 
 func (service userService) Update(id int, params view.UserView) error {
+	dob, err := time.Parse("2006-01-02T15:04:05.000Z", params.DOB)
+	if err != nil {
+		return err
+	}
+
+	updatedAt := time.Now().UTC().Format("2006-01-02T15:04:05.000Z")
+
 	getQuery := `
 		SELECT id, first_name, last_name, role, email, phone, password, gender, address FROM user WHERE id = $1;
 	`
@@ -94,6 +109,7 @@ func (service userService) Update(id int, params view.UserView) error {
 	user.Phone = params.PhoneNumber
 	user.Gender = params.Gender
 	user.Address = params.Address
+	user.Dob = dob.Format("2006-01-02T15:04:05.000Z")
 
 	newHashedPassword, err := bcrypt.GenerateFromPassword([]byte(params.Password), 15)
 	if err != nil {
@@ -103,11 +119,11 @@ func (service userService) Update(id int, params view.UserView) error {
 
 	updateQuery := `
 		UPDATE user
-		SET first_name = $1, last_name = $2, role = $3, email = $4, phone = $5, password = $6, gender = $7, address = $8
-		WHERE id = $9
+		SET first_name = $1, last_name = $2, role = $3, email = $4, phone = $5, password = $6, gender = $7, address = $8, dob = $9, updated_at = $10
+		WHERE id = $11
 	`
 	if _, err := service.db.Exec(updateQuery, &user.FirstName, &user.LastName, &user.Role, &user.Email, &user.Phone,
-		&user.Password, &user.Gender, &user.Address, &id); err != nil {
+		&user.Password, &user.Gender, &user.Address, &user.Dob, &updatedAt, &id); err != nil {
 		return err
 	}
 
