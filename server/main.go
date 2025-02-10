@@ -5,9 +5,17 @@ import (
 	"artist-management-system/routes"
 	custom_validator "artist-management-system/validator"
 
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
+
+func LoadEnv(app *echo.Echo) {
+	err := godotenv.Load()
+	if err != nil {
+		app.Logger.Fatal("ERROR:: Failed to load .env file")
+	}
+}
 
 func main() {
 	app := echo.New()
@@ -16,6 +24,7 @@ func main() {
 		app.Logger.Fatal(err.Error())
 	}
 	defer db.Close()
+	LoadEnv(app)
 	app.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
 	app.Validator = custom_validator.NewCustomValidator()
 

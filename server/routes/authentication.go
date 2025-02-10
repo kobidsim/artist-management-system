@@ -14,5 +14,5 @@ func SetupRegisterRoutes(app *echo.Echo, db *sql.DB) {
 
 	app.POST("/login", handler.Login)
 	app.POST("/register", handler.Register)
-	app.POST("/logout", handler.Logout)
+	app.GET("/logout", handler.Logout)
 }

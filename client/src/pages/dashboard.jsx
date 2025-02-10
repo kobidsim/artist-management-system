@@ -1,15 +1,35 @@
-import { Link, Route, Routes } from "react-router-dom"
+import { Link, Route, Routes, useNavigate } from "react-router-dom"
 import ProtectedRoute from "../components/protectedroute"
 import UserPage from "./user"
 import ArtistPage from "./artist"
 import { Content, Header } from "antd/es/layout/layout"
 import MusicPage from "./music"
+import axios from "axios"
+import { message } from "antd"
 
 export default function Dashboard() {
     const role = localStorage.getItem("role")
+    const navigate = useNavigate()
+    const [messageApi, contextHolder] = message.useMessage()
+
+    const handleLogout = () => {
+        const jwt = localStorage.getItem("jwt")
+        axios.get("http://localhost:8080/logout", {
+            headers: {
+                Authorization: `Bearer ${jwt}`
+            }
+        }).then((res)=>navigate("/"))
+        .catch((error) => {
+            messageApi.open({
+                type: "error",
+                content: error?.response?.data?.message,
+            })
+        })
+    }
 
     return(
         <>
+            {contextHolder}
             <Header
                 style={{
                     display: "flex",
@@ -35,7 +55,14 @@ export default function Dashboard() {
                         <Link to={"/dashboard/artists"}>Artists</Link>
                     </div>
                     <div>
-                        <span>Logout</span>
+                        <span
+                            onClick={handleLogout}
+                            style={{
+                                cursor: 'pointer',
+                            }}
+                        >
+                            Logout
+                        </span>
                     </div>
                 </div>
             </Header>

@@ -19,6 +19,8 @@ func main() {
 
 		DROP TABLE IF EXISTS music;
 
+		DROP TABLE IF EXISTS invalid_tokens;
+
 		CREATE TABLE IF NOT EXISTS user (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			first_name VARCHAR(255),
@@ -55,6 +57,10 @@ func main() {
 			created_at TEXT,
 			updated_at TEXT,
 			FOREIGN KEY (artist_id) REFERENCES artist(id)
+		);
+
+		CREATE TABLE IF NOT EXISTS invalid_tokens (
+			token TEXT
 		);
 	`
 

@@ -4,7 +4,10 @@ import (
 	"artist-management-system/domain"
 	"artist-management-system/view"
 	"database/sql"
+	"errors"
 	"fmt"
+	"os"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
@@ -17,6 +20,7 @@ type authenticationService struct {
 type AuthenticationService interface {
 	Login(params view.LoginView) (map[string]interface{}, error)
 	Register(params view.RegisterView) error
+	Logout(token string) error
 }
 
 func NewAuthenticationService(db *sql.DB) AuthenticationService {
@@ -45,10 +49,17 @@ func (service authenticationService) Login(params view.LoginView) (map[string]in
 			"id":    user.ID,
 			"email": user.Email,
 			"role":  user.Role,
+			"iat":   time.Now().Unix(),
+			"exp":   time.Now().Add(time.Hour * 24).Unix(),
 		},
 	)
 
-	signedToken, err := token.SignedString([]byte("secret"))
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		return nil, errors.New("no secret set in env file")
+	}
+
+	signedToken, err := token.SignedString([]byte(secret))
 	if err != nil {
 		fmt.Printf("ERROR::error signing token:: %s\n", err.Error())
 		return nil, err
@@ -76,6 +87,19 @@ func (service authenticationService) Register(params view.RegisterView) error {
 	}
 	if _, err := service.db.Exec(query, params.FirstName, params.LastName, params.Role,
 		params.Email, string(hashedPassword), params.PhoneNumber, params.Gender, params.Address); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (service authenticationService) Logout(token string) error {
+	query := `
+		INSERT INTO invalid_tokens
+		VALUES ($1);
+	`
+
+	if _, err := service.db.Exec(query, &token); err != nil {
 		return err
 	}
 

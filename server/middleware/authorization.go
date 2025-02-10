@@ -1,9 +1,12 @@
 package middleware
 
 import (
+	"artist-management-system/database"
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
@@ -21,9 +24,43 @@ func AdminAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		tokenString := strings.Split(authHeader, " ")[1]
+		db, err := database.NewDatabase()
+		if err != nil {
+			fmt.Println("ERROR:: error getting db connection: ", err.Error())
+			return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+				"error":   true,
+				"message": "Something went wrong",
+			})
+		}
+		defer db.Close()
+
+		isInvalid := false
+		if err := db.QueryRow("SELECT EXISTS (SELECT 1 FROM invalid_tokens WHERE token = $1);", tokenString).Scan(&isInvalid); err != nil {
+			fmt.Println("ERROR:: error querying db: ", err.Error())
+			return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+				"error":   true,
+				"message": "Something went wrong",
+			})
+		}
+		if isInvalid {
+			fmt.Println("ERROR:: token is expired")
+			return ctx.JSON(http.StatusUnauthorized, map[string]interface{}{
+				"error":   true,
+				"message": "Session expired",
+			})
+		}
+
+		secret := os.Getenv("JWT_SECRET")
+		if secret == "" {
+			fmt.Println("ERROR:: no secret found in env")
+			return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+				"error":   true,
+				"message": "Something went wrong",
+			})
+		}
 
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			return []byte("secret"), nil
+			return []byte(secret), nil
 		})
 		if err != nil {
 			fmt.Printf("ERROR:: error parsing token: %s\n", err.Error())
@@ -39,6 +76,24 @@ func AdminAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			return ctx.JSON(http.StatusUnauthorized, map[string]interface{}{
 				"error":   true,
 				"message": "Invalid auth token",
+			})
+		}
+
+		exp, ok := claims["exp"].(float64)
+		if !ok {
+			fmt.Printf("ERROR:: no expiry claim\n")
+			return ctx.JSON(http.StatusUnauthorized, map[string]interface{}{
+				"error":   true,
+				"message": "Invalid Token",
+			})
+		}
+
+		expTime := time.Unix(int64(exp), 0)
+		if time.Now().After(expTime) {
+			fmt.Printf("ERROR:: token expired\n")
+			return ctx.JSON(http.StatusUnauthorized, map[string]interface{}{
+				"error":   true,
+				"message": "Session Expired",
 			})
 		}
 
@@ -77,9 +132,43 @@ func AdminManagerAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		tokenString := strings.Split(authHeader, " ")[1]
+		db, err := database.NewDatabase()
+		if err != nil {
+			fmt.Println("ERROR:: error getting db connection: ", err.Error())
+			return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+				"error":   true,
+				"message": "Something went wrong",
+			})
+		}
+		defer db.Close()
+
+		isInvalid := false
+		if err := db.QueryRow("SELECT EXISTS (SELECT 1 FROM invalid_tokens WHERE token = $1);", tokenString).Scan(&isInvalid); err != nil {
+			fmt.Println("ERROR:: error querying db: ", err.Error())
+			return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+				"error":   true,
+				"message": "Something went wrong",
+			})
+		}
+		if isInvalid {
+			fmt.Println("ERROR:: token is expired")
+			return ctx.JSON(http.StatusUnauthorized, map[string]interface{}{
+				"error":   true,
+				"message": "Session expired",
+			})
+		}
+
+		secret := os.Getenv("JWT_SECRET")
+		if secret == "" {
+			fmt.Println("ERROR:: no secret found in env")
+			return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+				"error":   true,
+				"message": "Something went wrong",
+			})
+		}
 
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			return []byte("secret"), nil
+			return []byte(secret), nil
 		})
 		if err != nil {
 			fmt.Printf("ERROR:: error parsing token: %s\n", err.Error())
@@ -95,6 +184,24 @@ func AdminManagerAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			return ctx.JSON(http.StatusUnauthorized, map[string]interface{}{
 				"error":   true,
 				"message": "Invalid auth token",
+			})
+		}
+
+		exp, ok := claims["exp"].(float64)
+		if !ok {
+			fmt.Printf("ERROR:: no expiry claim\n")
+			return ctx.JSON(http.StatusUnauthorized, map[string]interface{}{
+				"error":   true,
+				"message": "Invalid Token",
+			})
+		}
+
+		expTime := time.Unix(int64(exp), 0)
+		if time.Now().After(expTime) {
+			fmt.Printf("ERROR:: token expired\n")
+			return ctx.JSON(http.StatusUnauthorized, map[string]interface{}{
+				"error":   true,
+				"message": "Session Expired",
 			})
 		}
 

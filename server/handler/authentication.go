@@ -5,6 +5,7 @@ import (
 	"artist-management-system/view"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -63,5 +64,25 @@ func (handler authenticationHandler) Register(ctx echo.Context) error {
 }
 
 func (handler authenticationHandler) Logout(ctx echo.Context) error {
-	return nil
+	authHeader := ctx.Request().Header.Get("Authorization")
+	if authHeader == "" {
+		fmt.Println("ERROR:: invalid auth header: ", authHeader)
+		return ctx.JSON(http.StatusUnauthorized, map[string]interface{}{
+			"error":   true,
+			"message": "Unauthorized",
+		})
+	}
+
+	tokenString := strings.Split(authHeader, " ")[1]
+	if err := handler.authenticationService.Logout(tokenString); err != nil {
+		fmt.Println("ERROR:: could not invalidate token: ", authHeader)
+		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error":   true,
+			"message": "Error logging out",
+		})
+	}
+
+	return ctx.JSON(http.StatusOK, map[string]interface{}{
+		"error": false,
+	})
 }
